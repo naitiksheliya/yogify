@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Navbar styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgb(31 41 55 );
+  padding: 1rem 2rem;
+}
+
+.navbar-logo a {
+  color: #fff;
+  font-size: 1.5rem;
+  text-decoration: none;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navbar-links li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.navbar-links li a:hover {
+  color: #ccc;
+}
+
+/* ExplorePage styles */
+.explore-page {
+  background-image: url('C:\Users\acer\.cursor-tutor\yogify2.0\src\assets\background.jpg'); /* Update with the correct path to your image */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* This will make the background image fixed while scrolling */
+  min-height: 100vh; /* This ensures the background covers the full viewport height */
+  padding: 2rem;
+}
+
+.explore-content {
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background for content */
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+/* Classes styles */
+.classes {
+  padding: 1rem 0;
+}
+
+.class-tile {
+  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+}
+
+.class-tile h3, .class-tile p {
+  margin: 0.5rem 0;
+  color: #333;
+}
+
+/* Testimonials styles */
+.testimonials {
+  padding: 1rem 0;
+}
+
+.testimonial-tile {
+  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+}
+
+.testimonial-tile p {
+  margin: 0.5rem 0;
+  color: #333;
+}
+.loadingSpinnerContainer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 5000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.loadingSpinner {
+  width: 64px;
+  height: 64px;
+  border: 8px solid;
+  border-color: #00cc66 transparent #00cc66 transparent;
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+}
+
+.pageContainer{
+  max-width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 20px;
+  border: transparent;
+}
