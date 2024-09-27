@@ -46,8 +46,14 @@ function ClassItem({ classData }) {
       const bookingDetails = {
         userId: auth.currentUser.uid,
         username: auth.currentUser.displayName,
+        email:auth.currentUser.email,
         instructorName: instructorName,
         classId: classData.id,
+        address:classData.address,
+        title:classData.title,
+        imageUrl:classData.imageUrl,
+        level:classData.level,
+        modeofclasses:classData.modeOfClasses,
         timestamp: serverTimestamp(),
       };
 
@@ -64,11 +70,16 @@ function ClassItem({ classData }) {
       // Navigate to the Congratulations page
       navigate('/congratulations', {
         state: {
-          userName: auth.currentUser.displayName,
-          instructorName: instructorName,
-          classAddress: classData.address,
-          classId: classData.id,
-          bookingId:docRef.id,
+        username: auth.currentUser.displayName,
+        email:auth.currentUser.email,
+        instructorName: instructorName,
+        classId: classData.id,
+        address:classData.address,
+        title:classData.title,
+        imageUrl:classData.imageUrl,
+        level:classData.level,
+        modeofclasses:classData.modeOfClasses,
+        timestamp: serverTimestamp(),
         },
       });
     }

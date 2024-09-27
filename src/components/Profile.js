@@ -35,7 +35,7 @@ function Profile() {
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         setFormData(doc.data())
-        console.log(bookingIds);
+        // console.log(bookingIds);
         if (doc.data().role === "instructor") {
           setInstructor(true)
         }
@@ -49,6 +49,7 @@ function Profile() {
     navigate('/')
   }
   const handleViewBookings = () => {
+    console.log(formData.bookingIds)
     console.log("Navigating with bookingIds:", formData.bookingIds);
     navigate('/user-dashboard', {
       state: { bookingIds: formData.bookingIds }
@@ -257,11 +258,11 @@ function Profile() {
           </div>
         </div>
       </div>
-      <div className='block center-align w-60 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg text-center transition duration-200'>
+      {/* <div className='block center-align w-60 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg text-center transition duration-200'>
       <button onClick={handleViewBookings}>View Bookings
         {console.log(formData.bookingIds)}
       </button>
-    </div>
+    </div> */}
       {instructor && (
         <div className="mt-6 flex justify-center">
           <Link

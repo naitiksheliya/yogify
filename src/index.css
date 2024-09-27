@@ -49,7 +49,7 @@ code {
 
 /* ExplorePage styles */
 .explore-page {
-  background-image: url('C:\Users\acer\.cursor-tutor\yogify2.0\src\assets\background.jpg'); /* Update with the correct path to your image */
+  /* background-image: url('C:\Users\acer\.cursor-tutor\yogify2.0\src\assets\background.jpg'); Update with the correct path to your image */
   background-size: cover;
   background-position: center;
   background-attachment: fixed; /* This will make the background image fixed while scrolling */

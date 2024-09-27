@@ -37,7 +37,7 @@ function App() {
             <Route path="/edit-class/:classId" element={<EditClass />} />
             <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
             <Route path="/congratulations" element={<Congratulations />} />
-            <Route path="/user-dashboard" element={<UserDashboard />} />
+            {/* <Route path="/user-dashboard" element={<UserDashboard />} /> */}
           </Routes>
         </div>
         </div>
