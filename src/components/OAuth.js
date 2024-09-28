@@ -33,7 +33,12 @@ function OAuth() {
       }
       navigate('/')
     } catch (error) {
-      toast.error('Could not authorize with Google')
+      console.log(error);
+      if (error.code === 'auth/email-already-in-use') {
+        toast.error('Email is already in use. Please use a different email or try logging in.')
+      } else {
+        toast.error('Something went wrong with registration')
+      }
     }
   }
 

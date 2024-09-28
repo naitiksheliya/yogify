@@ -14,9 +14,12 @@ function ClassItem({ classData }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
       if (currentUser) {
+        setUser(currentUser);
         checkIfUserEnrolled(currentUser.uid);
+      } else {
+        setUser(null);
+        setBooknowbutton(true);
       }
     });
 
