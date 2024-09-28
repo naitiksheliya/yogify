@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { getAuth } from 'firebase/auth'
+import { Link, useNavigate } from 'react-router-dom'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import ClassItem from './classItem'
@@ -8,28 +8,45 @@ import { toast } from 'react-toastify'
 
 function InstructorDashboard() {
   const [classes, setClasses] = useState([])
+  const [loading, setLoading] = useState(true)
   const auth = getAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const fetchCreatedClasses = async () => {
-      try {
-        const classesRef = collection(db, "classes");
-        const q = query(classesRef, where("instructorId", "==", auth.currentUser.uid));
-        const querySnapshot = await getDocs(q);
-
-        const fetchedClasses = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-
-        setClasses(fetchedClasses);
-      } catch (error) {
-        console.error("Error fetching created classes:", error);
-        toast.error("Failed to fetch created classes");
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchCreatedClasses(user.uid)
+      } else {
+        navigate('/sign-up')
+        toast.error('Please sign up or log in to access the Instructor Dashboard')
       }
-    };
-    fetchCreatedClasses()
-  }, [auth.currentUser.uid])
+      setLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [auth, navigate])
+
+  const fetchCreatedClasses = async (userId) => {
+    try {
+      const classesRef = collection(db, "classes");
+      const q = query(classesRef, where("instructorId", "==", userId));
+      const querySnapshot = await getDocs(q);
+
+      const fetchedClasses = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setClasses(fetchedClasses);
+    } catch (error) {
+      console.error("Error fetching created classes:", error);
+      toast.error("Failed to fetch created classes");
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
