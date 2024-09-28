@@ -11,37 +11,29 @@ import Spinner from './spinner'
 function CreateListing() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    capacity: null,
+    capacity: '',
     city: '',
-    createdAt: serverTimestamp(),
     date: '',
     description: '',
-    // geoLocation: {
-    //   lat: null,
-    //   lng: null
-    // },
-    image: "https://firebasestorage.googleapis.com/v0/b/yogify-256a2.appspot.com/o/images%2FgbWiF8Q8FkNpF0dqhxzsd2AUss42-pexels-prasanthinturi-1051838.jpg-6b23aa0f-0dca-4b5d-994b-7c93daf7355e?alt=media&token=32340546-9d39-4799-99a3-f12a0f3e2ae6",
+    image: null,
     level: '',
     location: '',
     modeOfClasses: '',
     title: '',
-    address: '',  // Add this new field
+    address: '',
   })
 
   const {
     capacity,
     city,
-    createdAt,
     date,
     description,
-    // geoLocation,
     image,
-    instructorId,
     level,
     location,
     modeOfClasses,
     title,
-    address,  // Add this new field
+    address,
   } = formData
 
   const auth = getAuth()
@@ -57,69 +49,105 @@ function CreateListing() {
     e.preventDefault()
     setLoading(true)
 
+    if (!validateForm()) {
+      setLoading(false)
+      return
+    }
+
+    try {
+      const imageUrl = await storeImage(image)
+
+      const formDataCopy = {
+        ...formData,
+        imageUrl,
+        capacity: parseInt(capacity),
+        createdAt: serverTimestamp(),
+        instructorId: auth.currentUser.uid,
+      }
+
+      delete formDataCopy.image
+
+      const docRef = await addDoc(collection(db, 'classes'), formDataCopy)
+      setLoading(false)
+      toast.success('Listing created successfully')
+      navigate('/profile')
+    } catch (error) {
+      console.error('Error creating listing:', error)
+      setLoading(false)
+      toast.error('Could not create listing')
+    }
+  }
+
+  const validateForm = () => {
+    if (!title.trim()) {
+      toast.error('Title is required')
+      return false
+    }
+    if (!description.trim()) {
+      toast.error('Description is required')
+      return false
+    }
+    if (!capacity || capacity <= 0) {
+      toast.error('Capacity must be a positive number')
+      return false
+    }
+    if (!city.trim()) {
+      toast.error('City is required')
+      return false
+    }
+    if (!date) {
+      toast.error('Date is required')
+      return false
+    }
+    if (!location.trim()) {
+      toast.error('Location is required')
+      return false
+    }
+    if (!level) {
+      toast.error('Level is required')
+      return false
+    }
+    if (!modeOfClasses) {
+      toast.error('Mode of Classes is required')
+      return false
+    }
+    if (!address.trim()) {
+      toast.error('Address is required')
+      return false
+    }
     if (!image) {
-      setLoading(false)
-      toast.error('Please select an image')
-      return
+      toast.error('Image is required')
+      return false
     }
+    return true
+  }
 
-    // Store image in firebase
-    const storeImage = async (image) => {
-      return new Promise((resolve, reject) => {
-        const storage = getStorage()
-        const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`
-        const storageRef = ref(storage, 'images/' + fileName)
-        const uploadTask = uploadBytesResumable(storageRef, image)
+  const storeImage = async (image) => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage()
+      const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`
+      const storageRef = ref(storage, 'images/' + fileName)
+      const uploadTask = uploadBytesResumable(storageRef, image)
 
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            console.log('Upload is ' + progress + '% done')
-          },
-          (error) => {
-            reject(error)
-          },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              resolve(downloadURL)
-            })
-          }
-        )
-      })
-    }
-
-    const imageUrl = await storeImage(image).catch(() => {
-      setLoading(false)
-      toast.error('Image not uploaded')
-      return
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          console.log('Upload is ' + progress + '% done')
+        },
+        (error) => {
+          reject(error)
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL)
+          })
+        }
+      )
     })
-
-    const formDataCopy = {
-      ...formData,
-      imageUrl,
-      createdAt: serverTimestamp(),
-      instructorId: auth.currentUser.uid,
-    }
-
-    delete formDataCopy.image
-
-    const docRef = await addDoc(collection(db, 'classes'), formDataCopy)
-    setLoading(false)
-    toast.success('Listing created successfully')
-    navigate('/profile')
   }
 
   const onMutate = (e) => {
-    let boolean = null
-
-    if (e.target.value === 'true') {
-      boolean = true
-    }
-    if (e.target.value === 'false') {
-      boolean = false
-    }
-
     // Files
     if (e.target.files) {
       setFormData((prevState) => ({
@@ -132,7 +160,7 @@ function CreateListing() {
     if (!e.target.files) {
       setFormData((prevState) => ({
         ...prevState,
-        [e.target.id]: boolean ?? e.target.value,
+        [e.target.id]: e.target.value,
       }))
     }
   }
@@ -274,7 +302,7 @@ function CreateListing() {
             id="image"
             onChange={onMutate}
             accept=".jpg,.png,.jpeg"
-            // required
+            required
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
@@ -292,32 +320,6 @@ function CreateListing() {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
-
-        {/* <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Geolocation</label>
-          <div className="flex space-x-4">
-            <input
-              type="number"
-              id="geoLocation.lat"
-              value={geoLocation.lat}
-              onChange={onMutate}
-              step="any"
-              placeholder="Latitude"
-              required
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-            <input
-              type="number"
-              id="geoLocation.lng"
-              value={geoLocation.lng}
-              onChange={onMutate}
-              step="any"
-              placeholder="Longitude"
-              required
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-        </div> */}
 
         <div className="flex items-center justify-center">
           <button

@@ -1,14 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkerAlt, FaUsers, FaCalendarAlt, FaClock, FaLaptop, FaChalkboardTeacher, FaEdit, FaMapPin } from 'react-icons/fa';
-import { getAuth } from 'firebase/auth';
+import { FaMapMarkerAlt, FaUsers, FaCalendarAlt, FaClock, FaLaptop, FaChalkboardTeacher, FaEdit, FaGraduationCap } from 'react-icons/fa';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { addDoc, collection, serverTimestamp, updateDoc, arrayUnion, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-
+import { toast } from 'react-toastify';
 
 function ClassItem({ classData }) {
   const auth = getAuth();
   const navigate = useNavigate();
+  const [booknowbutton, setBooknowbutton] = useState(true);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        checkIfUserEnrolled(currentUser.uid);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, classData.students]);
+
+  const checkIfUserEnrolled = (userId) => {
+    if (classData.students && classData.students.includes(userId)) {
+      setBooknowbutton(false);
+    }
+  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -19,69 +38,48 @@ function ClassItem({ classData }) {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
-  const [booknowbutton, setBooknowbutton] = useState(true);
-  useEffect(() => {
-    checkIfUserEnrolled();
-  }, []);
-
-  const checkIfUserEnrolled = () => {
-    if (auth.currentUser && classData.students) {
-      if (classData.students.includes(auth.currentUser.uid)) {
-        setBooknowbutton(false);
-      }
-    }
-  };
 
   const handleAction = async () => {
-    if (auth.currentUser && auth.currentUser.uid === classData.instructorId) {
-      // Navigate to edit class page
+    if (!user) {
+      toast.error('Please sign up or log in to book a class');
+      navigate('/sign-up');
+      return;
+    }
+
+    if (user.uid === classData.instructorId) {
       navigate(`/edit-class/${classData.id}`);
     } else {
-      // Fetch instructor's name
-      const instructorRef = doc(db, 'users', classData.instructorId);
-      const instructorSnap = await getDoc(instructorRef);
-      const instructorName = instructorSnap.data().name;
+      try {
+        const instructorRef = doc(db, 'users', classData.instructorId);
+        const instructorSnap = await getDoc(instructorRef);
+        const instructorName = instructorSnap.data().name;
 
-      // Handle booking logic here
-      const bookingDetails = {
-        userId: auth.currentUser.uid,
-        username: auth.currentUser.displayName,
-        email:auth.currentUser.email,
-        instructorName: instructorName,
-        classId: classData.id,
-        address:classData.address,
-        title:classData.title,
-        imageUrl:classData.imageUrl,
-        level:classData.level,
-        modeofclasses:classData.modeOfClasses,
-        timestamp: serverTimestamp(),
-      };
+        const bookingDetails = {
+          userId: user.uid,
+          username: user.displayName,
+          email: user.email,
+          instructorName: instructorName,
+          classId: classData.id,
+          address: classData.address,
+          title: classData.title,
+          imageUrl: classData.imageUrl,
+          level: classData.level,
+          modeofclasses: classData.modeOfClasses,
+          timestamp: serverTimestamp(),
+        };
 
-      // Add booking details to the 'bookings' collection
-      console.log(bookingDetails);
-      const docRef = await addDoc(collection(db, 'bookings'), bookingDetails);
+        const docRef = await addDoc(collection(db, 'bookings'), bookingDetails);
 
-      // Append the user ID to the 'students' array in the class document
-      const classRef = doc(db, 'classes', classData.id);
-      await updateDoc(classRef, {
-        students: arrayUnion(auth.currentUser.uid),
-      });
+        const classRef = doc(db, 'classes', classData.id);
+        await updateDoc(classRef, {
+          students: arrayUnion(user.uid),
+        });
 
-      // Navigate to the Congratulations page
-      navigate('/congratulations', {
-        state: {
-        username: auth.currentUser.displayName,
-        email:auth.currentUser.email,
-        instructorName: instructorName,
-        classId: classData.id,
-        address:classData.address,
-        title:classData.title,
-        imageUrl:classData.imageUrl,
-        level:classData.level,
-        modeofclasses:classData.modeOfClasses,
-        timestamp: serverTimestamp(),
-        },
-      });
+        navigate('/congratulations', { state: bookingDetails });
+      } catch (error) {
+        console.error("Error booking class:", error);
+        toast.error("Failed to book class. Please try again.");
+      }
     }
   };
 
@@ -118,17 +116,20 @@ function ClassItem({ classData }) {
             )}
             {classData.modeOfClasses}
           </button>
+          <button className="text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-xs px-2.5 py-1.5 text-center inline-flex items-center dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">
+            <FaGraduationCap className="w-3 h-3 me-1" />
+            {classData.level}
+          </button>
         </div>
         <button
-          disabled={!booknowbutton}
           onClick={handleAction}
           className={`inline-flex text-center items-center px-3 py-2 text-sm font-medium text-center rounded-lg focus:outline-none ${
-            booknowbutton
+            booknowbutton && user
               ? 'text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
               : 'text-gray-500 bg-gray-300 cursor-not-allowed'
           }`}
         >
-          {!(auth.currentUser && auth.currentUser.uid === classData.instructorId) ? (
+          {!(user && user.uid === classData.instructorId) ? (
             <>
               {booknowbutton ? 'Book now' : 'Booked'}
               {booknowbutton && (
