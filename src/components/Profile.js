@@ -59,7 +59,8 @@ function Profile() {
   const onSubmit = async () => {
     try {
       let profileImageUrl = formData.profileImageUrl;
-      if (imageFile) {
+      if (imageFile!=null) {
+        console.log(imageFile);
         profileImageUrl = await storeImage(imageFile);
       }
 

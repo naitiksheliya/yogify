@@ -129,6 +129,23 @@ h2 {
   margin-left: auto;
   margin-right: auto;
 }
+
+/* Medium screens (tablets and smaller desktops) */
+@media (max-width: 1024px) {
+  .pageContainer {
+    max-width: 60%;
+  }
+}
+
+/* Small screens (mobile devices) */
+@media (max-width: 640px) {
+  .pageContainer {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
